@@ -167,6 +167,29 @@ class DockerFish
     puts "Coded by Brian Hood"
   end
   
+  def apiget(url)
+    uri = URI.parse("#{url}")
+    puts "Request URI: #{url}"
+    http = Net::HTTP.new(uri.host, uri.port)
+    response = http.request(Net::HTTP::Get.new(uri.request_uri))  
+  end
+  
+  def apipost(url, body="")
+    uri = URI.parse("#{url}")
+    puts "Request URI: #{url}"
+    http = Net::HTTP.new(uri.host, uri.port)
+    request = Net::HTTP::Post.new(uri.request_uri)
+    request.set_content_type("application/json")
+    request.body = body unless body.empty?
+    response = http.request(request)
+  end
+  
+  def apidelete(url)
+    uri = URI.parse("#{url}")
+    http = Net::HTTP.new(uri.host, uri.port)
+    response = http.request(Net::HTTP::Delete.new(uri.request_uri))
+  end
+  
   def chooser(opts)
     @url = "#{@baseurl}#{opts}"
   end
@@ -175,9 +198,7 @@ class DockerFish
     
     case action
     when action = "images"
-      uri = URI.parse("#{@url}")
-      http = Net::HTTP.new(uri.host, uri.port)
-      response = http.request(Net::HTTP::Get.new(uri.request_uri))
+      response = apiget("#{@url}")
       begin
         j = JSON.parse(response.body)
       rescue JSON::ParserError
@@ -210,9 +231,7 @@ class DockerFish
         print "\n"
       }
     when action = "containers"
-      uri = URI.parse("#{@url}")
-      http = Net::HTTP.new(uri.host, uri.port)
-      response = http.request(Net::HTTP::Get.new(uri.request_uri))
+      response = apiget("#{@url}")
       begin
         j = JSON.parse(response.body)
       rescue JSON::ParserError
@@ -248,15 +267,7 @@ class DockerFish
       }
       #pp j
     when action = "start"
-      uri = URI.parse("#{@url}")
-      puts "Request URI: #{@url}"
-      http = Net::HTTP.new(uri.host, uri.port)
-      #pp http
-      request = Net::HTTP::Post.new(uri.request_uri)
-      request.set_content_type("application/json")
-      #pp request
-      response = http.request(request)
-      #pp http
+      response = apipost("#{@url}")
       if response.code == "204"
         puts "\e[1;30mStart Successfull\e[0m\ "
       elsif response.code == "304"
@@ -267,15 +278,7 @@ class DockerFish
         puts "\e[1;30mServer error\e[0m\ "
       end
     when action = "rename"
-      uri = URI.parse("#{@url}")
-      puts "Request URI: #{@url}"
-      http = Net::HTTP.new(uri.host, uri.port)
-      #pp http
-      request = Net::HTTP::Post.new(uri.request_uri)
-      request.set_content_type("application/json")
-      #pp request
-      response = http.request(request)
-      #pp response.code
+      response = apipost("#{@url}")
       if response.code == "204"
         puts "\e[1;30mRenamed Successfully\e[0m\ "
       elsif response.code == "404"
@@ -286,15 +289,7 @@ class DockerFish
         puts "\e[1;30mServer error\e[0m\ "
       end
     when action = "stop"
-      uri = URI.parse("#{@url}")
-      puts "Request URI: #{@url}"
-      http = Net::HTTP.new(uri.host, uri.port)
-      #pp http
-      request = Net::HTTP::Post.new(uri.request_uri)
-      request.set_content_type("application/json")
-      #pp request
-      response = http.request(request)
-      #pp http
+      response = apipost("#{@url}")
       if response.code == "204"
         puts "\e[1;30mStopped Successfully\e[0m\ "
       elsif response.code == "304"
@@ -305,9 +300,7 @@ class DockerFish
         puts "\e[1;30mServer error\e[0m\ "
       end
     when action = "inspect"
-      uri = URI.parse("#{@url}")
-      http = Net::HTTP.new(uri.host, uri.port)
-      response = http.request(Net::HTTP::Get.new(uri.request_uri))
+      response = apiget("#{@url}")
       begin
         j = JSON.parse(response.body)
       rescue JSON::ParserError
@@ -315,9 +308,7 @@ class DockerFish
       end
       pp j
     when action = "remove"
-      uri = URI.parse("#{@url}")
-      http = Net::HTTP.new(uri.host, uri.port)
-      response = http.request(Net::HTTP::Delete.new(uri.request_uri))
+      response = apidelete("#{@url}")
       if response.code == "204"
         puts "\e[1;30mRemoved Successfully\e[0m\ "
       elsif response.code == "400"
@@ -356,17 +347,7 @@ class DockerFish
 }]
       body.gsub!("##image##", @image)
       puts body
-      uri = URI.parse("#{@url}?name=#{@name}")
-      puts "Request URI: #{@url}?name=#{@name}"
-      http = Net::HTTP.new(uri.host, uri.port)
-      #pp http
-      request = Net::HTTP::Post.new(uri.request_uri)
-      request.set_content_type("application/json")
-      #request.set_form_data({"name" => "#{@name}"})
-      request.body = body
-      #pp request
-      response = http.request(request)
-      #pp http
+      response = apipost("#{@url}?name=#{@name}", body)
       if response.code == "201"
         puts "\e[1;30mContainer Creation Successfull\e[0m\ "
         j = JSON.parse(response.body)
@@ -384,9 +365,7 @@ class DockerFish
         puts "\e[1;30mServer error\e[0m\ "
       end
     when action = "imagehistory"
-      uri = URI.parse("#{@url}")
-      http = Net::HTTP.new(uri.host, uri.port)
-      response = http.request(Net::HTTP::Get.new(uri.request_uri))
+      response = apiget("#{@url}")
       begin
         j = JSON.parse(response.body)
       rescue JSON::ParserError
@@ -420,9 +399,7 @@ class DockerFish
         puts "\e[1;30mServer error\e[0m\ "
       end
     when action = "containerprocs"
-      uri = URI.parse("#{@url}")
-      http = Net::HTTP.new(uri.host, uri.port)
-      response = http.request(Net::HTTP::Get.new(uri.request_uri))
+      response = apiget("#{@url}")
       begin
         j = JSON.parse(response.body)
       rescue JSON::ParserError
@@ -430,9 +407,7 @@ class DockerFish
       end
       pp j
     when action = "search"
-      uri = URI.parse("#{@url}")
-      http = Net::HTTP.new(uri.host, uri.port)
-      response = http.request(Net::HTTP::Get.new(uri.request_uri))
+      response = apiget("#{@url}")
       begin
         j = JSON.parse(response.body)
       rescue JSON::ParserError
