@@ -171,7 +171,11 @@ class DockerFish
     uri = URI.parse("#{url}")
     puts "Request URI: #{url}"
     http = Net::HTTP.new(uri.host, uri.port)
-    response = http.request(Net::HTTP::Get.new(uri.request_uri))  
+    begin
+      response = http.request(Net::HTTP::Get.new(uri.request_uri))  
+    rescue
+      puts "Error retrieving data"
+    end
   end
   
   def apipost(url, body="")
@@ -180,14 +184,22 @@ class DockerFish
     http = Net::HTTP.new(uri.host, uri.port)
     request = Net::HTTP::Post.new(uri.request_uri)
     request.set_content_type("application/json")
-    request.body = body unless body.empty?
-    response = http.request(request)
+    begin
+      request.body = body unless body.empty?
+      response = http.request(request)
+    rescue
+      puts "Error posting data"
+    end
   end
   
   def apidelete(url)
     uri = URI.parse("#{url}")
     http = Net::HTTP.new(uri.host, uri.port)
-    response = http.request(Net::HTTP::Delete.new(uri.request_uri))
+    begin
+      response = http.request(Net::HTTP::Delete.new(uri.request_uri))
+    rescue
+      puts "Error posting data"
+    end
   end
   
   def chooser(opts)
