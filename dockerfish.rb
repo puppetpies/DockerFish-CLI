@@ -488,7 +488,7 @@ class DockerFish
           puts "\e[1;36m11)\e[0m\ List Container processes"
           puts "\e[1;36m12)\e[0m\ Remove Image"
           puts "\e[1;36m13)\e[0m\ Pause container"
-          puts "\e[1;36m14)\e[0m\ Unpause container"
+          puts "\e[1;36m14)\e[0m\ Resume container"
           puts ""
           puts "m: This menu"
           puts "b: Bookmarks"
