@@ -347,6 +347,15 @@ class DockerFish
       elsif response.code == "500"
         puts "\e[1;30mServer error\e[0m\ "
       end
+    when action = "imagecommit"
+      response = apipost("#{@url}")
+      if response.code == "201"
+        puts "\e[1;30mImage Commit Successfull\e[0m\ "
+      elsif response.code == "404"
+        puts "\e[1;30mNo such container\e[0m\ "
+      elsif response.code == "500"
+        puts "\e[1;30mServer error\e[0m\ "
+      end
     when action = "create"
       body = %q[{
      "Hostname":"",
@@ -482,13 +491,14 @@ class DockerFish
           puts "\e[1;36m5)\e[0m\ Rename Container"
           puts "\e[1;36m6)\e[0m\ Create Container from Image"
           puts "\e[1;36m7)\e[0m\ Remove Container"
-          puts "\e[1;36m8)\e[0m\ Inspect Container / Image"
+          puts "\e[1;36m8)\e[0m\ Inspect Container"
           puts "\e[1;36m9)\e[0m\ View Image History"
           puts "\e[1;36m10)\e[0m\ Search for Images"
           puts "\e[1;36m11)\e[0m\ List Container processes"
           puts "\e[1;36m12)\e[0m\ Remove Image"
           puts "\e[1;36m13)\e[0m\ Pause container"
           puts "\e[1;36m14)\e[0m\ Resume container"
+          puts "\e[1;36m15)\e[0m\ Create a new image from a container's changes"
           puts ""
           puts "m: This menu"
           puts "b: Bookmarks"
@@ -606,6 +616,20 @@ class DockerFish
               chooser("/containers/#{buf2}/unpause")
               puts "#{@url}"
               apicall("pause")
+              break
+            end
+          when "15"
+            while buf2 = Readline.readline("\e[1;33m\Enter Container to Image>\e[0m\ ", true)
+              while buf3 = Readline.readline("\e[1;33m\Enter your commit comment important>\e[0m\ ", true)
+                commentenc = URI.encode(buf3)
+                break
+              end
+              while buf4 = Readline.readline("\e[1;33m\Enter your Repository name>\e[0m\ ", true)
+                chooser("/commit?container=#{buf2}&comment=#{commentenc}&repo=#{buf4}")
+                break
+              end
+              puts "#{@url}"
+              apicall("imagecommit")
               break
             end
           when "m"
