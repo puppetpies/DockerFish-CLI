@@ -23,7 +23,7 @@ VERSION = 0.1
   Bri's TODO list
   
     TODO: Fix multiple container start
-    TODO: Add Remove Image
+    TODO: Add Pause container
     TODO: Add Pull of image from Repository
     TODO: Download progress bar for images
     TODO: Refactor code duplication / case statement
@@ -318,6 +318,17 @@ class DockerFish
       elsif response.code == "500"
         puts "\e[1;30mServer error\e[0m\ "
       end
+    when action = "imageremove"
+      response = apidelete("#{@url}")
+      if response.code == "200"
+        puts "\e[1;30mRemoved Successfully\e[0m\ "
+      elsif response.code == "404"
+        puts "\e[1;30mNo such image\e[0m\ "
+      elsif response.code == "409"
+        puts "\e[1;30mConflict removing image\e[0m\ "
+      elsif response.code == "500"
+        puts "\e[1;30mServer error\e[0m\ "
+      end
     when action = "create"
       body = %q[{
      "Hostname":"",
@@ -457,6 +468,7 @@ class DockerFish
           puts "\e[1;36m9)\e[0m\ View Image History"
           puts "\e[1;36m10)\e[0m\ Search for Images"
           puts "\e[1;36m11)\e[0m\ List Container processes"
+          puts "\e[1;36m12)\e[0m\ Remove Image"
           puts ""
           puts "m: This menu"
           puts "b: Bookmarks"
@@ -554,7 +566,14 @@ class DockerFish
               puts "#{@url}"
               apicall("containerprocs")
               break
-            end            
+            end
+          when "12"
+            while buf2 = Readline.readline("\e[1;33m\Enter Image to remove>\e[0m\ ", true)
+              chooser("/images/#{buf2}")
+              puts "#{@url}"
+              apicall("imageremove")
+              break
+            end
           when "m"
             apicall("menu")
           #when "b"
