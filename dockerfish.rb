@@ -22,8 +22,8 @@ VERSION = 0.1
 
   Bri's TODO list
   
+    TODO: Add Export image
     TODO: Fix multiple container start
-    TODO: Add Pause container
     TODO: Add Pull of image from Repository
     TODO: Download progress bar for images
     TODO: Refactor code duplication / case statement
@@ -277,6 +277,24 @@ class DockerFish
       elsif response.code == "500"
         puts "\e[1;30mServer error\e[0m\ "
       end
+    when action = "pause"
+      response = apipost("#{@url}")
+      if response.code == "204"
+        puts "\e[1;30mPaused Successfull\e[0m\ "
+      elsif response.code == "404"
+        puts "\e[1;30mNo such container\e[0m\ "
+      elsif response.code == "500"
+        puts "\e[1;30mServer error\e[0m\ "
+      end
+    when action = "unpause"
+      response = apipost("#{@url}")
+      if response.code == "204"
+        puts "\e[1;30mResumed Successfull\e[0m\ "
+      elsif response.code == "404"
+        puts "\e[1;30mNo such container\e[0m\ "
+      elsif response.code == "500"
+        puts "\e[1;30mServer error\e[0m\ "
+      end
     when action = "rename"
       response = apipost("#{@url}")
       if response.code == "204"
@@ -469,6 +487,8 @@ class DockerFish
           puts "\e[1;36m10)\e[0m\ Search for Images"
           puts "\e[1;36m11)\e[0m\ List Container processes"
           puts "\e[1;36m12)\e[0m\ Remove Image"
+          puts "\e[1;36m13)\e[0m\ Pause container"
+          puts "\e[1;36m14)\e[0m\ Unpause container"
           puts ""
           puts "m: This menu"
           puts "b: Bookmarks"
@@ -572,6 +592,20 @@ class DockerFish
               chooser("/images/#{buf2}")
               puts "#{@url}"
               apicall("imageremove")
+              break
+            end
+          when "13"
+            while buf2 = Readline.readline("\e[1;33m\Pause Container name / id>\e[0m\ ", true)
+              chooser("/containers/#{buf2}/pause")
+              puts "#{@url}"
+              apicall("pause")
+              break
+            end
+          when "14"
+            while buf2 = Readline.readline("\e[1;33m\Resume Container name / id>\e[0m\ ", true)
+              chooser("/containers/#{buf2}/unpause")
+              puts "#{@url}"
+              apicall("pause")
               break
             end
           when "m"
