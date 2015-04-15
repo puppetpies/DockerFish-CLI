@@ -165,11 +165,12 @@ class DockerFish
     puts "Enjoy!"
     puts "\n"
     puts "Coded by Brian Hood"
+    version
   end
   
   def apiget(url)
     uri = URI.parse("#{url}")
-    puts "Request URI: #{url}"
+    #puts "Request URI: #{url}"
     http = Net::HTTP.new(uri.host, uri.port)
     begin
       response = http.request(Net::HTTP::Get.new(uri.request_uri))  
@@ -180,7 +181,7 @@ class DockerFish
   
   def apipost(url, body="")
     uri = URI.parse("#{url}")
-    puts "Request URI: #{url}"
+    #puts "Request URI: #{url}"
     http = Net::HTTP.new(uri.host, uri.port)
     request = Net::HTTP::Post.new(uri.request_uri)
     request.set_content_type("application/json")
@@ -199,6 +200,19 @@ class DockerFish
       response = http.request(Net::HTTP::Delete.new(uri.request_uri))
     rescue
       puts "Error posting data"
+    end
+  end
+  
+  def version
+    @url = "#{@baseurl}/version"
+    uri = URI.parse("#{@url}")
+    response = apiget("#{@url}")
+    puts "Server Info:\n\n"
+    begin
+      j = JSON.parse(response.body)
+      pp j
+    rescue JSON::ParserError
+      puts "Could not read JSON data"
     end
   end
   
@@ -370,7 +384,7 @@ class DockerFish
       end
     when action = "create"
       body = %q[{
-     "Hostname":"",
+     "Hostname":"##name##",
      "User":"",
      "Memory":0,
      "MemorySwap":0,
@@ -395,6 +409,7 @@ class DockerFish
        "Devices": []
      }
 }]
+      body.gsub!("##name##", @name)
       body.gsub!("##image##", @image)
       puts body
       response = apipost("#{@url}?name=#{@name}", body)
@@ -477,11 +492,11 @@ class DockerFish
          when "is_automated"
            automated = "#{s[0]}: #{s[1]}"
          when "name"
-           name = "#{s[0]}: #{s[1]}"
+           name = "Image: \e[1;36m\ [\"#{s[1]}\"] \e[0m\ "
          when "star_count"
-           starcount = "#{s[0]}: #{s[1]}"
+           starcount = "Star rating: #{s[1]}"
          end
-         print "#{name} #{offical} #{automated} #{starcount} #{description}"
+         print "#{name} #{starcount}".lstrip
          #pp s
         }
         print "\n"
@@ -519,17 +534,17 @@ class DockerFish
           case buf
           when "1"
             chooser("/images/json?all=0")
-            puts "#{@url}"
+            #puts "#{@url}"
             apicall("images")
           when "2"
             chooser("/containers/json?all=1")
-            puts "#{@url}"
+            #puts "#{@url}"
             apicall("containers")
           when "3"
             while buf2 = Readline.readline("\e[1;33m\Enter Container to Start>\e[0m\ ", true)
               puts "\e[1;30mStarting Container #{buf2}\e[0m\ "
               chooser("/containers/#{buf2}/restart")
-              puts "#{@url}"
+              #puts "#{@url}"
               apicall("start")
               break
             end
@@ -537,7 +552,7 @@ class DockerFish
             while buf2 = Readline.readline("\e[1;33m\Enter Container to Stop>\e[0m\ ", true)
               puts "\e[1;30mStopping Container #{buf2}\e[0m\ "
               chooser("/containers/#{buf2}/stop")
-              puts "#{@url}"
+              #puts "#{@url}"
               apicall("stop")
               break
             end
@@ -547,7 +562,7 @@ class DockerFish
                 chooser("/containers/#{buf2}/rename?name=#{buf3}")
                 break
               end
-              puts "#{@url}"
+              #puts "#{@url}"
               apicall("rename")
               break
             end
@@ -577,56 +592,56 @@ class DockerFish
           when "7"
             while buf2 = Readline.readline("\e[1;33m\Enter Container to Remove>\e[0m\ ", true)
               chooser("/containers/#{buf2}")
-              puts "#{@url}"
+              #puts "#{@url}"
               apicall("remove")
               break                
             end
           when "8"
             while buf2 = Readline.readline("\e[1;33m\Enter Container to Inspect>\e[0m\ ", true)
               chooser("/containers/#{buf2}/json")
-              puts "#{@url}"
+              #puts "#{@url}"
               apicall("inspect")
               break
             end
           when "9"
             while buf2 = Readline.readline("\e[1;33m\View history of image>\e[0m\ ", true)
               chooser("/images/#{buf2}/history")
-              puts "#{@url}"
+              #puts "#{@url}"
               apicall("imagehistory")
               break
             end
           when "10"
             while buf2 = Readline.readline("\e[1;33m\Search for images>\e[0m\ ", true)
               chooser("/images/search?term=#{buf2}")
-              puts "#{@url}"
+              #puts "#{@url}"
               apicall("search")
               break
             end
           when "11"
             while buf2 = Readline.readline("\e[1;33m\Enter Container to query>\e[0m\ ", true)
               chooser("/containers/#{buf2}/top")
-              puts "#{@url}"
+              #puts "#{@url}"
               apicall("containerprocs")
               break
             end
           when "12"
             while buf2 = Readline.readline("\e[1;33m\Enter Image to remove>\e[0m\ ", true)
               chooser("/images/#{buf2}")
-              puts "#{@url}"
+              #puts "#{@url}"
               apicall("imageremove")
               break
             end
           when "13"
             while buf2 = Readline.readline("\e[1;33m\Pause Container name / id>\e[0m\ ", true)
               chooser("/containers/#{buf2}/pause")
-              puts "#{@url}"
+              #puts "#{@url}"
               apicall("pause")
               break
             end
           when "14"
             while buf2 = Readline.readline("\e[1;33m\Resume Container name / id>\e[0m\ ", true)
               chooser("/containers/#{buf2}/unpause")
-              puts "#{@url}"
+              #puts "#{@url}"
               apicall("pause")
               break
             end
@@ -640,7 +655,7 @@ class DockerFish
                 chooser("/commit?container=#{buf2}&comment=#{commentenc}&repo=#{buf4}")
                 break
               end
-              puts "#{@url}"
+              #puts "#{@url}"
               apicall("imagecommit")
               break
             end
@@ -666,5 +681,5 @@ end
 t = DockerFish.new
 if defined? @dockerurl; t.baseurl = @dockerurl; end
 if defined? @bookmarkhost; t.baseurl = @bookmarkhost; end
-puts "BaseURL: #{t.baseurl}"
+#puts "BaseURL: #{t.baseurl}"
 t.apicall("menu")
