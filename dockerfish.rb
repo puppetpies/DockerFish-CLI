@@ -212,9 +212,9 @@ class DockerFish
   def version
     @url = "#{@baseurl}/version"
     uri = URI.parse("#{@url}")
-    response = apiget("#{@url}")
-    puts "Server Info:\n\n"
     begin
+      response = apiget("#{@url}")
+      puts "Server Info:\n\n"
       j = JSON.parse(response.body)
       pp j
     rescue JSON::ParserError, NoMethodError
