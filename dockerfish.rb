@@ -147,12 +147,11 @@ end
 
 class DockerFish
   
-  attr_accessor :baseurl, :splash
+  attr_accessor :baseurl
   
-  def initialize
+  def initialize(splash)
     @baseurl = "http://localhost:2375"
-    @splash = true
-    if @splash == true; banner; end
+    if splash == true; banner; end
   end
   
   def banner
@@ -698,11 +697,10 @@ end
 class FishControl
 
   def initialize
-    @apiobj = DockerFish.new
+    @apiobj = DockerFish.new(false)
   end
   
   def containerctl(container, action)
-    @apiobj.splash = false
     @apiobj.chooser("/containers/#{container}/#{action}")
     @apiobj.apicall("#{action}")
     exit
@@ -714,7 +712,7 @@ if argvstore.size > 0
   obj = FishControl.new
   if defined? @action; obj.containerctl(@container, @action); end
 elsif argvstore.size == 0
-  obj = DockerFish.new
+  obj = DockerFish.new(true)
   if defined? @dockerurl; obj.baseurl = @dockerurl; end
   if defined? @bookmarkhost; obj.baseurl = @bookmarkhost; end
   obj.apicall("menu")
