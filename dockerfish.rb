@@ -217,7 +217,7 @@ class DockerFish
     begin
       j = JSON.parse(response.body)
       pp j
-    rescue JSON::ParserError
+    rescue JSON::ParserError, NoMethodError
       puts "Could not read JSON data"
     end
   end
