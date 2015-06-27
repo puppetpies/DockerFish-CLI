@@ -17,7 +17,7 @@ require 'getoptlong'
 
 BOOKMARKSFILE = ".bookmarks"
 VERSION = 0.1
-  
+
 =begin
 
   Bri's TODO list
@@ -30,6 +30,9 @@ VERSION = 0.1
     TODO: Websocket attach with Eventmachine / Readline
   
 =end
+
+# GetOptLong remove argv value after processing so store to i can use it lower down.
+argvstore = ARGV[0].to_s
 
 trap("INT") {
   puts "\nSee you soon !"
@@ -112,9 +115,11 @@ opts.each do |opt, arg|
     when '--url'
       @dockerurl = arg
     when '--start'
-      @startcon = arg
+      @action = "start"
+      @container = arg
     when '--stop'
-      @stopcon = arg
+      @action = "stop"
+      @container = arg
   end
 end
 
@@ -142,11 +147,12 @@ end
 
 class DockerFish
   
-  attr_accessor :baseurl
+  attr_accessor :baseurl, :splash
   
   def initialize
     @baseurl = "http://localhost:2375"
-    banner
+    @splash = true
+    if @splash == true; banner; end
   end
   
   def banner
@@ -689,18 +695,27 @@ class DockerFish
   end
 end
 
-# Instantiate DockerFish instance
-apiobj = DockerFish.new
-if defined? @startcon
-  apiobj.chooser("/containers/#{@startcon}/restart")
-  apiobj.apicall("start")
-  exit
-elsif defined? @stopcon
-  apiobj.chooser("/containers/#{@stopcon}/stop")
-  apiobj.apicall("stop")
-  exit
+class FishControl
+
+  def initialize
+    @apiobj = DockerFish.new
+  end
+  
+  def containerctl(container, action)
+    @apiobj.splash = false
+    @apiobj.chooser("/containers/#{container}/#{action}")
+    @apiobj.apicall("#{action}")
+    exit
+  end
+  
 end
-if defined? @dockerurl; apiobj.baseurl = @dockerurl; end
-if defined? @bookmarkhost; apiobj.baseurl = @bookmarkhost; end
-#puts "BaseURL: #{t.baseurl}"
-apiobj.apicall("menu")
+
+if argvstore.size > 0
+  obj = FishControl.new
+  if defined? @action; obj.containerctl(@container, @action); end
+elsif argvstore.size == 0
+  obj = DockerFish.new
+  if defined? @dockerurl; obj.baseurl = @dockerurl; end
+  if defined? @bookmarkhost; obj.baseurl = @bookmarkhost; end
+  obj.apicall("menu")
+end
