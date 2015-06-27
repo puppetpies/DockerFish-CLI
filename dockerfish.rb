@@ -40,7 +40,8 @@ opts = GetoptLong.new(
   [ '--help', '-h', GetoptLong::NO_ARGUMENT ],
   [ '--url', '-u', GetoptLong::OPTIONAL_ARGUMENT ],
   [ '--bookmarks', '-b', GetoptLong::NO_ARGUMENT ],
-  [ '--start', '-s', GetoptLong::REQUIRED_ARGUMENT ]
+  [ '--start', '-s', GetoptLong::REQUIRED_ARGUMENT ],
+  [ '--stop', '-p', GetoptLong::REQUIRED_ARGUMENT ]
 )
 
 def bookmarks(file)
@@ -100,6 +101,9 @@ opts.each do |opt, arg|
        
 -s --start
     Start up container name / Id
+
+-p --stop
+    Stop container name / Id
 ]
       puts helper
       exit
@@ -108,7 +112,9 @@ opts.each do |opt, arg|
     when '--url'
       @dockerurl = arg
     when '--start'
-      @start = arg
+      @startcon = arg
+    when '--stop'
+      @stopcon = arg
   end
 end
 
@@ -685,9 +691,13 @@ end
 
 # Instantiate DockerFish instance
 apiobj = DockerFish.new
-if defined? @start
-  apiobj.chooser("/containers/#{@start}/restart")
+if defined? @startcon
+  apiobj.chooser("/containers/#{@startcon}/restart")
   apiobj.apicall("start")
+  exit
+elsif defined? @stopcon
+  apiobj.chooser("/containers/#{@stopcon}/stop")
+  apiobj.apicall("stop")
   exit
 end
 if defined? @dockerurl; apiobj.baseurl = @dockerurl; end
