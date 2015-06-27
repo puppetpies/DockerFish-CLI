@@ -39,7 +39,8 @@ trap("INT") {
 opts = GetoptLong.new(
   [ '--help', '-h', GetoptLong::NO_ARGUMENT ],
   [ '--url', '-u', GetoptLong::OPTIONAL_ARGUMENT ],
-  [ '--bookmarks', '-b', GetoptLong::NO_ARGUMENT ]
+  [ '--bookmarks', '-b', GetoptLong::NO_ARGUMENT ],
+  [ '--start', '-s', GetoptLong::REQUIRED_ARGUMENT ]
 )
 
 def bookmarks(file)
@@ -96,14 +97,18 @@ opts.each do |opt, arg|
    
    localhost http://127.0.0.1:2375
    remoteserver http://10.0.2.15:2375
-   
-    ]
+       
+-s --start
+    Start up container name / Id
+]
       puts helper
       exit
     when '--bookmarks'
       bookmarks("#{BOOKMARKSFILE}")
     when '--url'
       @dockerurl = arg
+    when '--start'
+      @start = arg
   end
 end
 
@@ -160,6 +165,7 @@ class DockerFish
     puts "TIPS: Please note ContainerId's / Names are interchangeable"
     puts "You can also use short ContainerId's as long as there is a unique match"
     puts "Start with Docker API Enabled: /usr/bin/docker --api-enable-cors=true -H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock -d"
+    puts "Add a symlink ln -s /home/brian/Projects/DockerFish/dockerfish.rb /usr/bin/dockerfish\n\n"
     puts "--help # For more information"
     puts "\n"
     puts "Enjoy!"
@@ -436,7 +442,7 @@ class DockerFish
       rescue JSON::ParserError
         puts "Could not read JSON data"
       end
-      puts "\e[1;30mContainer history\e[0m\ "
+      puts "\e[1;30mImage history\e[0m\ "
       puts "\e[1;30m=================\e[0m\ "
       puts ""
       #puts j.length
@@ -579,7 +585,7 @@ class DockerFish
                   puts "Creating multiple containers..."
                   con = buf3.split(",")
                   0.upto(con.length - 1) {|l|
-                    chooser("/containers/create")
+                    chooser("/containers/cryeate")
                     @name = con[l]
                     puts con[l]
                     apicall("create")
@@ -678,8 +684,13 @@ class DockerFish
 end
 
 # Instantiate DockerFish instance
-t = DockerFish.new
-if defined? @dockerurl; t.baseurl = @dockerurl; end
-if defined? @bookmarkhost; t.baseurl = @bookmarkhost; end
+apiobj = DockerFish.new
+if defined? @start
+  apiobj.chooser("/containers/#{@start}/restart")
+  apiobj.apicall("start")
+  exit
+end
+if defined? @dockerurl; apiobj.baseurl = @dockerurl; end
+if defined? @bookmarkhost; apiobj.baseurl = @bookmarkhost; end
 #puts "BaseURL: #{t.baseurl}"
-t.apicall("menu")
+apiobj.apicall("menu")
