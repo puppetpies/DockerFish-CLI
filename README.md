@@ -3,6 +3,8 @@ Dockerfish command line tool with readline support
 
 All you need is Ruby installed and i'm not using any Gems
 
+![Docker CLI ](https://raw.githubusercontent.com/puppetpies/DockerFish-CLI/master/screenshot.png)
+
 [brian@orville DockerFish]$ ./dockerfish.rb -h
 Welcome to DockerFish Version 0.1 
 ================================= 
