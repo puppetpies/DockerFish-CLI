@@ -701,8 +701,11 @@ class FishControl
   end
   
   def containerctl(container, action)
-    @apiobj.chooser("/containers/#{container}/#{action}")
-    @apiobj.apicall("#{action}")
+    container.split(",").each {|n|
+      puts "Container: #{n}"
+      @apiobj.chooser("/containers/#{n}/#{action}")
+      @apiobj.apicall("#{action}")  
+    }
     exit
   end
   
