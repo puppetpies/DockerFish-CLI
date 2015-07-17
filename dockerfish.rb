@@ -151,6 +151,7 @@ class DockerFish
   
   def initialize(splash)
     @baseurl = "http://localhost:2375"
+    @containerjson = "container.json"
     if splash == true; banner; end
   end
   
@@ -177,6 +178,10 @@ class DockerFish
     puts "You can also use short ContainerId's as long as there is a unique match"
     puts "Start with Docker API Enabled: /usr/bin/docker --api-enable-cors=true -H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock -d"
     puts "Add a symlink ln -s /home/brian/Projects/DockerFish/dockerfish.rb /usr/bin/dockerfish\n\n"
+    puts "Container Config file: #{Dir.home}/.dockerfish/#{@containerjson}\n\n"
+    if File.exists?("#{Dir.home}/.dockerfish/#{@containerjson}") == false
+      puts "\e[1;31m\WARNING: \e[0m\ \e[1;32m\ To Create Containers \e[1;33m\ mkdir #{Dir.home}/.dockerfish\e[0m\ \e[1;32m\ and copy the provided container.json into it !!!\e[0m\ \n\n"
+    end
     puts "--help # For more information"
     puts "\n"
     puts "Enjoy!"
@@ -400,33 +405,13 @@ class DockerFish
         puts "\e[1;30mServer error\e[0m\ "
       end
     when action = "create"
-      body = %q[{
-     "Hostname":"##name##",
-     "User":"",
-     "Memory":0,
-     "MemorySwap":0,
-     "CpuShares":0,
-     "AttachStdin":true,
-     "AttachStdout":true,
-     "AttachStderr":true,
-     "PortSpecs":null,
-     "Tty":true,
-     "OpenStdin":true,
-     "StdinOnce":true,
-     "Env":null,
-     "Cmd":[
-             "/bin/bash"
-     ],
-     "Dns":null,
-     "Image":"##image##",
-     "VolumesFrom":"",
-     "WorkingDir":"",
-     "HostConfig": {
-       "NetworkMode": "bridge",
-       "Devices": []
-     }
-}]
-      body.gsub!("##name##", @name)
+      body = String.new
+      File.open("#{@containerjson}", 'r') {|n|
+        n.each_line {|l|
+          body << l
+        }
+      }
+      body.gsub!("##hostname##", @hostname)
       body.gsub!("##image##", @image)
       puts body
       response = apipost("#{@url}?name=#{@name}", body)
@@ -586,22 +571,10 @@ class DockerFish
           when "6"
             while buf2 = Readline.readline("\e[1;33m\Enter Image to use>\e[0m\ ", true)
               @image = buf2
-              puts "Example: name or name1,name2,name3"
               while buf3 = Readline.readline("\e[1;33m\Enter Container name(s)>\e[0m\ ", true)
-                if buf3.match(",") == nil
-                  chooser("/containers/create")
-                  @name = buf3
-                  apicall("create")
-                else
-                  puts "Creating multiple containers..."
-                  con = buf3.split(",")
-                  0.upto(con.length - 1) {|l|
-                    chooser("/containers/cryeate")
-                    @name = con[l]
-                    puts con[l]
-                    apicall("create")
-                  }
-                end
+                chooser("/containers/create")
+                @hostname = buf3
+                apicall("create")
                 break
               end
               break
