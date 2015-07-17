@@ -1,0 +1,26 @@
+{
+     "Hostname":"##hostname##",
+     "User":"",
+     "Memory":0,
+     "MemorySwap":0,
+     "CpuShares":0,
+     "AttachStdin":true,
+     "AttachStdout":true,
+     "AttachStderr":true,
+     "PortSpecs":null,
+     "Tty":true,
+     "OpenStdin":true,
+     "StdinOnce":true,
+     "Env":null,
+     "Cmd":[
+             "/bin/bash"
+     ],
+     "Dns":null,
+     "Image":"##image##",
+     "VolumesFrom":"",
+     "WorkingDir":"",
+     "HostConfig": {
+       "NetworkMode": "bridge",
+       "Devices": []
+     }
+}
