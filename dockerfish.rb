@@ -39,14 +39,6 @@ trap("INT") {
   exit
 }
 
-opts = GetoptLong.new(
-  [ '--help', '-h', GetoptLong::NO_ARGUMENT ],
-  [ '--url', '-u', GetoptLong::OPTIONAL_ARGUMENT ],
-  [ '--bookmarks', '-b', GetoptLong::NO_ARGUMENT ],
-  [ '--start', '-s', GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--stop', '-p', GetoptLong::REQUIRED_ARGUMENT ]
-)
-
 def bookmarks(file)
   puts "\e[1;32mBookmarks\e[0m\ "
   puts "\e[1;32m=========\e[0m\ "
@@ -78,6 +70,17 @@ def bookmarks(file)
   end
 end
 
+
+opts = GetoptLong.new(
+  [ '--help', '-h', GetoptLong::NO_ARGUMENT ],
+  [ '--url', '-u', GetoptLong::OPTIONAL_ARGUMENT ],
+  [ '--bookmarks', '-b', GetoptLong::NO_ARGUMENT ],
+  [ '--start', '-s', GetoptLong::REQUIRED_ARGUMENT ],
+  [ '--stop', '-p', GetoptLong::REQUIRED_ARGUMENT ],
+  [ '--create', '-c', GetoptLong::REQUIRED_ARGUMENT ],
+  [ '--contimage', '-i', GetoptLong::REQUIRED_ARGUMENT ]
+)
+
 opts.each do |opt, arg|
   case opt
     when '--help'
@@ -101,7 +104,15 @@ opts.each do |opt, arg|
    
    localhost http://127.0.0.1:2375
    remoteserver http://10.0.2.15:2375
-       
+
+-c --createcon
+    Create container from image
+    
+-i --contimage
+    Create many from your container.json parameters.
+
+# Comma separated for multiple containers supported
+
 -s --start
     Start up container name / Id
 
@@ -120,6 +131,11 @@ opts.each do |opt, arg|
     when '--stop'
       @action = "stop"
       @container = arg
+    when '--create'
+      @action = "create"
+      @container = arg
+    when '--contimage'
+      @image = arg
   end
 end
 
@@ -148,6 +164,7 @@ end
 class DockerFish
   
   attr_accessor :baseurl
+  attr_writer :image, :hostname
   
   def initialize(splash)
     @baseurl = "http://localhost:2375"
@@ -406,7 +423,7 @@ class DockerFish
       end
     when action = "create"
       body = String.new
-      File.open("#{@containerjson}", 'r') {|n|
+      File.open("#{Dir.home}/.dockerfish/#{@containerjson}", 'r') {|n|
         n.each_line {|l|
           body << l
         }
@@ -414,10 +431,12 @@ class DockerFish
       body.gsub!("##hostname##", @hostname)
       body.gsub!("##image##", @image)
       puts body
+      if !defined? @name; @name = @hostname; end
       response = apipost("#{@url}?name=#{@name}", body)
       if response.code == "201"
         puts "\e[1;30mContainer Creation Successfull\e[0m\ "
         j = JSON.parse(response.body)
+        n = 0
         0.upto(j.length - 1) {|n|
           j[n].each {|s|
             puts "#{s[0]}: #{s[1]}"
@@ -671,12 +690,22 @@ class FishControl
 
   def initialize
     @apiobj = DockerFish.new(false)
+    @containerjson = "container.json"
   end
   
-  def containerctl(container, action)
+  def containerctl(container, action, image="<none>:<none>")
+    if image != "<none>:<none>"
+      @apiobj.image = image
+      puts "My Image: #{image}"
+    end
     container.split(",").each {|n|
-      puts "Container: #{n}"
-      @apiobj.chooser("/containers/#{n}/#{action}")
+      @apiobj.hostname = "#{n}"
+      puts "Container: #{n} Action: #{action}"
+      if action == "create"
+        @apiobj.chooser("/containers/#{action}")
+      else
+        @apiobj.chooser("/containers/#{n}/#{action}")
+      end
       @apiobj.apicall("#{action}")  
     }
     exit
@@ -686,7 +715,13 @@ end
 
 if argvstore.size > 0
   obj = FishControl.new
-  if defined? @action; obj.containerctl(@container, @action); end
+  if defined? @action
+    if @image
+      obj.containerctl(@container, @action, @image)
+    else
+      obj.containerctl(@container, @action)
+    end
+  end
 elsif argvstore.size == 0
   obj = DockerFish.new(true)
   if defined? @dockerurl; obj.baseurl = @dockerurl; end
