@@ -105,7 +105,7 @@ opts.each do |opt, arg|
    localhost http://127.0.0.1:2375
    remoteserver http://10.0.2.15:2375
 
--c --createcon
+-c --create
     Create container from image
     
 -i --contimage
