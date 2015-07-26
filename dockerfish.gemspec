@@ -1,5 +1,5 @@
 Gem::Specification.new do |s|
-  s.name        = 'docker'
+  s.name        = 'dockerfish'
   s.version     = '0.1.3'
   s.date        = '2015-07-26'
   s.summary     = "Dockerfish"
