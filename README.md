@@ -3,6 +3,8 @@ Dockerfish command line tool with readline support
 
 All you need is Ruby installed and i'm not using any Gems
 
+Remember ( gem install dockerfish )
+
 ![Docker CLI ](https://raw.githubusercontent.com/puppetpies/DockerFish-CLI/master/screenshot.png)
 
 [brian@orville DockerFish]$ ./dockerfish.rb -h
@@ -34,4 +36,10 @@ Bookmarks
 2) wifi http://10.130.2.128:2375
 3) test http://0.0.0.0:2375
 Enter Bookmark> 
+
+dockerfish --start test-01,test-02
+dockerfish --stop test-01,test-02
+
+# Create a container
+dockerfish --create centos-01 --contimage centos:latest
 
