@@ -82,7 +82,8 @@ class DockerFish
     #puts "Request URI: #{url}"
     http = Net::HTTP.new(uri.host, uri.port)
     begin
-      response = http.request(Net::HTTP::Get.new(uri.request_uri))  
+      response = http.request(Net::HTTP::Get.new(uri.request_uri))
+      puts response.body
     rescue
       puts "Error retrieving data"
     end
