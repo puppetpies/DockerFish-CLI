@@ -1,4 +1,7 @@
 # DockerFish-CLI
+
+[![Gem Version](https://badge.fury.io/rb/dockerfish.svg)](https://badge.fury.io/rb/dockerfish)
+
 Dockerfish command line tool with readline support
 
 All you need is Ruby installed and i'm not using any Gems
