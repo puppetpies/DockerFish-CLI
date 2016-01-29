@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'dockerfish'
-  s.version     = '0.1.3'
-  s.date        = '2015-07-26'
+  s.version     = '0.1.4'
+  s.date        = '2016-01-29'
   s.summary     = "Dockerfish"
   s.description = "A Sysadmin Tool for Docker fans!"
   s.authors     = ["Brian Hood"]
@@ -10,5 +10,5 @@ Gem::Specification.new do |s|
   s.executables = ["dockerfish"]
   s.homepage    =
     'http://rubygems.org/gems/dockerfish'
-  s.license       = 'MIT'
+  s.license       = 'BSD'
 end
